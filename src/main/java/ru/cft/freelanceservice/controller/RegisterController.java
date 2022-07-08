@@ -2,14 +2,10 @@ package ru.cft.freelanceservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.cft.freelanceservice.repository.model.SampleEntity;
 import ru.cft.freelanceservice.service.RegisterService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("api/register")

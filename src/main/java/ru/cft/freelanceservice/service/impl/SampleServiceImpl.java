@@ -2,8 +2,7 @@ package ru.cft.freelanceservice.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.cft.freelanceservice.repository.SampleRepository;
-import ru.cft.freelanceservice.repository.model.SampleEntity;
+import ru.cft.freelanceservice.repository.RegisterRepository;
 import ru.cft.freelanceservice.service.RegisterService;
 
 import java.util.List;
@@ -11,10 +10,10 @@ import java.util.List;
 @Service
 public class SampleServiceImpl implements RegisterService {
 
-    private final SampleRepository sampleRepository;
+    private final RegisterRepository sampleRepository;
 
     @Autowired
-    public SampleServiceImpl(SampleRepository sampleRepository) {
+    public SampleServiceImpl(RegisterRepository sampleRepository) {
         this.sampleRepository = sampleRepository;
     }
 
