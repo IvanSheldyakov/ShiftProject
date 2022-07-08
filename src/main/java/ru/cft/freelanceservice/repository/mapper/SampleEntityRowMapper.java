@@ -1,8 +1,8 @@
-package ru.cft.yellowrubberduck.repository.mapper;
+package ru.cft.freelanceservice.repository.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.cft.yellowrubberduck.repository.model.SampleEntity;
+import ru.cft.freelanceservice.repository.model.SampleEntity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

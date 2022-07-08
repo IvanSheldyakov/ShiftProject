@@ -1,4 +1,4 @@
-package ru.cft.yellowrubberduck.repository.model;
+package ru.cft.freelanceservice.repository.model;
 
 import javax.persistence.*;
 

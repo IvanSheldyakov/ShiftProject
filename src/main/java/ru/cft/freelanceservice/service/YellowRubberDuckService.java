@@ -1,12 +1,8 @@
-package ru.cft.yellowrubberduck.service;
+package ru.cft.freelanceservice.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.cft.yellowrubberduck.model.DuckProperties;
-import ru.cft.yellowrubberduck.model.Message;
-import ru.cft.yellowrubberduck.model.Properties;
-import ru.cft.yellowrubberduck.model.SoundProperties;
 
 @Service
 public class YellowRubberDuckService {

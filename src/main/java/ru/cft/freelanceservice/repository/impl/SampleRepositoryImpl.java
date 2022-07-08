@@ -1,11 +1,11 @@
-package ru.cft.yellowrubberduck.repository.impl;
+package ru.cft.freelanceservice.repository.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.cft.yellowrubberduck.repository.SampleRepository;
-import ru.cft.yellowrubberduck.repository.model.SampleEntity;
+import ru.cft.freelanceservice.repository.SampleRepository;
+import ru.cft.freelanceservice.repository.model.SampleEntity;
 
 import java.util.List;
 

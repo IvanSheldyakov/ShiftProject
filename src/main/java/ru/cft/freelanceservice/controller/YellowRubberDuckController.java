@@ -1,4 +1,4 @@
-package ru.cft.yellowrubberduck.controller;
+package ru.cft.freelanceservice.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -6,9 +6,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.cft.yellowrubberduck.model.MaterialProperties;
-import ru.cft.yellowrubberduck.model.Properties;
-import ru.cft.yellowrubberduck.service.YellowRubberDuckService;
+import ru.cft.freelanceservice.service.YellowRubberDuckService;
 
 @Api(description = "Actions for very very yellow duck!")
 @RestController

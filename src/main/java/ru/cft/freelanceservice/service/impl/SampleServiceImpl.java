@@ -1,15 +1,15 @@
-package ru.cft.yellowrubberduck.service.impl;
+package ru.cft.freelanceservice.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.cft.yellowrubberduck.repository.SampleRepository;
-import ru.cft.yellowrubberduck.repository.model.SampleEntity;
-import ru.cft.yellowrubberduck.service.SampleService;
+import ru.cft.freelanceservice.repository.SampleRepository;
+import ru.cft.freelanceservice.repository.model.SampleEntity;
+import ru.cft.freelanceservice.service.RegisterService;
 
 import java.util.List;
 
 @Service
-public class SampleServiceImpl implements SampleService {
+public class SampleServiceImpl implements RegisterService {
 
     private final SampleRepository sampleRepository;
 

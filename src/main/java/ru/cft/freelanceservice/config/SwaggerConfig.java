@@ -1,4 +1,4 @@
-package ru.cft.yellowrubberduck.config;
+package ru.cft.freelanceservice.config;
 
 import io.swagger.annotations.Api;
 import org.springframework.context.annotation.Bean;

@@ -1,6 +1,6 @@
-package ru.cft.yellowrubberduck.repository;
+package ru.cft.freelanceservice.repository;
 
-import ru.cft.yellowrubberduck.repository.model.SampleEntity;
+import ru.cft.freelanceservice.repository.model.SampleEntity;
 
 import java.util.List;
 
