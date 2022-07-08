@@ -4,13 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.cft.freelanceservice.repository.SampleRepository;
-import ru.cft.freelanceservice.repository.model.SampleEntity;
+import ru.cft.freelanceservice.repository.RegisterRepository;
 
 import java.util.List;
 
 @Repository
-public class SampleRepositoryImpl implements SampleRepository {
+public class SampleRepositoryImpl implements RegisterRepository {
 
     private JdbcTemplate jdbcTemplate;
     private RowMapper<SampleEntity> rowMapper;
