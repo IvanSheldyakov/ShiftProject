@@ -4,13 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.cft.freelanceservice.exceptions.EmptyDTOFieldsException;
 import ru.cft.freelanceservice.exceptions.UserIsAlreadyRegisteredException;
 import ru.cft.freelanceservice.model.CustomerRegisterDTO;
 import ru.cft.freelanceservice.model.ExecutorRegisterDTO;
 import ru.cft.freelanceservice.model.SpecializationPriceDTO;
 import ru.cft.freelanceservice.repository.PriceRepository;
-import ru.cft.freelanceservice.repository.RegisterCustomerRepository;
-import ru.cft.freelanceservice.repository.RegisterExecutorRepository;
+import ru.cft.freelanceservice.repository.CustomerRepository;
+import ru.cft.freelanceservice.repository.ExecutorRepository;
 import ru.cft.freelanceservice.repository.SpecializationRepository;
 import ru.cft.freelanceservice.repository.model.Customer;
 import ru.cft.freelanceservice.repository.model.Executor;
@@ -21,18 +22,19 @@ import ru.cft.freelanceservice.service.RegisterService;
 import javax.naming.NoInitialContextException;
 import java.util.ArrayList;
 
+//TODO id
 @Service
 public class RegisterServiceImpl implements RegisterService {
 
-    private final RegisterCustomerRepository customerRepository;
-    private final RegisterExecutorRepository executorRepository;
+    private final CustomerRepository customerRepository;
+    private final ExecutorRepository executorRepository;
 
     private final PriceRepository priceRepository;
     private final SpecializationRepository specializationRepository;
 
     @Autowired
-    public RegisterServiceImpl(RegisterCustomerRepository customerRepository,
-                               RegisterExecutorRepository executorRepository,
+    public RegisterServiceImpl(CustomerRepository customerRepository,
+                               ExecutorRepository executorRepository,
                                PriceRepository priceRepository,
                                SpecializationRepository specializationRepository) {
 
@@ -48,14 +50,14 @@ public class RegisterServiceImpl implements RegisterService {
         try {
             checkCustomerForEmptyFields(customerRegisterDTO);
             checkForCustomerRegistration(customerRegisterDTO);
-        } catch (NoInitialContextException exception) {
+        } catch (EmptyDTOFieldsException exception) {
             return new ResponseEntity<>("No data", HttpStatus.BAD_REQUEST);
         } catch (UserIsAlreadyRegisteredException exception) {
             return new ResponseEntity<>("Such user is already registered",HttpStatus.CONFLICT);
         }
 
-        saveCustomer(customerRegisterDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
+        Customer customer = saveCustomer(customerRegisterDTO);
+        return new ResponseEntity<>(customer,HttpStatus.OK);
     }
 
     @Override
@@ -63,18 +65,18 @@ public class RegisterServiceImpl implements RegisterService {
         try {
             checkExecutorForEmptyFields(executorRegisterDTO);
             checkForExecutorRegistration(executorRegisterDTO);
-        } catch (NoInitialContextException exception) {
+        } catch (EmptyDTOFieldsException exception) {
             return new ResponseEntity<>("No data", HttpStatus.BAD_REQUEST);
         } catch (UserIsAlreadyRegisteredException exception) {
             return new ResponseEntity<>("Such user is already registered",HttpStatus.CONFLICT);
         }
-        saveExecutor(executorRegisterDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
+        Executor executor = saveExecutor(executorRegisterDTO);
+        return new ResponseEntity<>(executor,HttpStatus.OK);
     }
 
-    private void checkCustomerForEmptyFields(CustomerRegisterDTO dto) throws NoInitialContextException {
+    private void checkCustomerForEmptyFields(CustomerRegisterDTO dto) throws EmptyDTOFieldsException {
         if (dto.getEmail() == null || dto.getName() == null) {
-            throw new NoInitialContextException();
+            throw new EmptyDTOFieldsException();
         }
     }
 
@@ -84,24 +86,25 @@ public class RegisterServiceImpl implements RegisterService {
         }
     }
 
-    private void saveCustomer(CustomerRegisterDTO dto) {
+    private Customer saveCustomer(CustomerRegisterDTO dto) {
         Customer customer = new Customer();
         customer.setFieldsFrom(dto);
         customerRepository.save(customer);
+        return customer;
     }
 
 
-    private void checkExecutorForEmptyFields(ExecutorRegisterDTO dto) throws NoInitialContextException {
-        if (dto.getEmail() == null || dto.getName() == null) {throw new NoInitialContextException("there is no email or name");}
-        if (dto.getSpecializationsAndPrices().size() < 1) {throw new NoInitialContextException("there is no specializations");}
+    private void checkExecutorForEmptyFields(ExecutorRegisterDTO dto) throws EmptyDTOFieldsException {
+        if (dto.getEmail() == null || dto.getName() == null) {throw new EmptyDTOFieldsException("there is no email or name");}
+        if (dto.getSpecializationsAndPrices().size() < 1) {throw new EmptyDTOFieldsException("there is no specializations");}
         for (SpecializationPriceDTO specializationPriceDTO : dto.getSpecializationsAndPrices()) {
             checkSpecializationAndPricesForEmptyFields(specializationPriceDTO);
         }
     }
 
-    private void checkSpecializationAndPricesForEmptyFields(SpecializationPriceDTO dto) throws NoInitialContextException {
+    private void checkSpecializationAndPricesForEmptyFields(SpecializationPriceDTO dto) throws EmptyDTOFieldsException {
         if (dto.getSpecialization() == null || dto.getPrice() == null) {
-            throw new NoInitialContextException("there is no specialization or price");
+            throw new EmptyDTOFieldsException("there is no specialization or price");
         }
     }
 
@@ -111,11 +114,12 @@ public class RegisterServiceImpl implements RegisterService {
         }
     }
 
-    private void saveExecutor(ExecutorRegisterDTO dto) {
+    private Executor saveExecutor(ExecutorRegisterDTO dto) {
         Executor executor = new Executor();
         executor.setFieldsFrom(dto);
         executorRepository.save(executor);
         saveSpecializationsAndPrices(dto,executor);
+        return executor;
     }
 
     private void saveSpecializationsAndPrices(ExecutorRegisterDTO registerDTO, Executor executor) {

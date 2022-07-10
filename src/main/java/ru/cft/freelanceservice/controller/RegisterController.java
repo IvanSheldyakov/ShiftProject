@@ -16,7 +16,7 @@ import ru.cft.freelanceservice.service.RegisterService;
 @RequestMapping("api/register")
 public class RegisterController {
 
-    private RegisterService registerService;
+    private final RegisterService registerService;
 
     @Autowired
     public RegisterController(RegisterService registerService){

@@ -1,6 +1,7 @@
 package ru.cft.freelanceservice.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import ru.cft.freelanceservice.model.TaskDTO;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -95,8 +96,12 @@ public class Task {
     public Set<Specialization> getSpecializations() {
         return specializations;
     }
-
     public void setSpecializations(Set<Specialization> specializations) {
         this.specializations = specializations;
+    }
+
+    public void setFieldsFrom(TaskDTO dto) {
+        name = dto.getName();
+        description = dto.getDescription();
     }
 }
