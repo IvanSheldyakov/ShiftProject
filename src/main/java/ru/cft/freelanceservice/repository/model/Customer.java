@@ -2,6 +2,7 @@ package ru.cft.freelanceservice.repository.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import ru.cft.freelanceservice.model.CustomerRegisterDTO;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -63,5 +64,10 @@ public class Customer {
 
     public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
+    }
+
+    public void setFieldsFrom(CustomerRegisterDTO dto) {
+        name = dto.getName();
+        email = dto.getEmail();
     }
 }

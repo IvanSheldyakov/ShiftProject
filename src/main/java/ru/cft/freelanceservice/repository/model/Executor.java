@@ -1,8 +1,10 @@
 package ru.cft.freelanceservice.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import ru.cft.freelanceservice.model.ExecutorRegisterDTO;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,7 +28,6 @@ public class Executor {
     @JoinColumn(name = "task_id", referencedColumnName = "id")
     private Task task;
 
-    private String price;
 
     public long getId() {
         return id;
@@ -60,19 +61,16 @@ public class Executor {
         this.specializations = specializations;
     }
 
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
     public Task getTask() {
         return task;
     }
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    public void setFieldsFrom(ExecutorRegisterDTO dto) {
+        name = dto.getName();
+        email = dto.getEmail();
     }
 }

@@ -1,6 +1,8 @@
 package ru.cft.freelanceservice.repository.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,7 +19,7 @@ public class Specialization {
 
     @ManyToMany
     @JoinTable(name = "specialization_executor",
-    joinColumns = @JoinColumn(name = "specil_id"),
+    joinColumns = @JoinColumn(name = "special_id"),
     inverseJoinColumns = @JoinColumn(name = "executor_id"))
     private Set<Executor> executors = new HashSet<>();
 
@@ -25,7 +27,19 @@ public class Specialization {
     @JoinColumn(name = "task_id", referencedColumnName = "id")
     private Task task;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "specialization")
+    private Set<Price> prices = new HashSet<>();
 
+    public void addPrice(Price price) {
+        prices.add(price);
+        price.setSpecialization(this);
+    }
+
+    public void removePrice(Price price) {
+        price.setSpecialization(null);
+        prices.remove(price);
+    }
 
     public void addExecutor(Executor executor) {
         executors.add(executor);
