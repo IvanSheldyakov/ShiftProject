@@ -4,16 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.example</groupId>
-	<artifactId>yellow-rubber-duck</artifactId>
+	<artifactId>HelpFinderService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>1.17</java.version>
 	</properties>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.6.RELEASE</version>
+		<version>2.7.1</version>
 		<relativePath/>
 	</parent>
 	<dependencies>
@@ -38,12 +38,13 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>5.2.5.RELEASE-SECURITY-PATCH</version>
+			<version>5.3.21</version>
+
 		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<version>3.0.0</version>
 		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -57,6 +58,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.24</version>
+			<scope>provided</scope>
+		</dependency>
+
+
+
 	</dependencies>
 
 	<build>
