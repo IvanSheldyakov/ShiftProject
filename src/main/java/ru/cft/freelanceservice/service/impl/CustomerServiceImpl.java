@@ -117,9 +117,9 @@ public class CustomerServiceImpl implements CustomerService {
     private Task createNewTask(TaskDTO taskDTO) {
         Task task = new Task();
         task.setFieldsFrom(taskDTO);
+        task = taskRepository.save(task);
         addSpecializations(taskDTO, task);
-        taskRepository.save(task);
-        return task;
+        return taskRepository.save(task);
     }
 
     private void addSpecializations(TaskDTO taskDTO, Task task) {
@@ -137,8 +137,7 @@ public class CustomerServiceImpl implements CustomerService {
     private Specialization createNewSpecialization(String specialization) {
         Specialization newSpecialization = new Specialization();
         newSpecialization.setSpecialization(specialization);
-        specializationRepository.save(newSpecialization);
-        return newSpecialization;
+        return specializationRepository.save(newSpecialization);
     }
 
     private void checkForEmptyFields(TaskDTO dto) throws EmptyDTOFieldsException {
