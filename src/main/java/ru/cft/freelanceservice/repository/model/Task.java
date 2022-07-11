@@ -1,9 +1,12 @@
 package ru.cft.freelanceservice.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import ru.cft.freelanceservice.model.TaskDTO;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -41,6 +44,13 @@ public class Task {
         executor.setTask(null);
     }
 
+    public void removeExecutors(List<Executor> toRemove) {
+        toRemove.forEach(executors::remove);
+        for (Executor executor : toRemove) {
+            executor.setTask(null);
+        }
+    }
+
 
     public void addSpecialization(Specialization specialization) {
         specializations.add(specialization);
@@ -50,6 +60,13 @@ public class Task {
     public void removeSpecialization(Specialization specialization) {
         specializations.remove(specialization);
         specialization.setTask(null);
+    }
+
+    public void removeSpecializations(List<Specialization> toRemove) {
+        toRemove.forEach(specializations::remove);
+        for (Specialization specialization : toRemove) {
+            specialization.setTask(null);
+        }
     }
 
     public long getId() {
@@ -95,8 +112,12 @@ public class Task {
     public Set<Specialization> getSpecializations() {
         return specializations;
     }
-
     public void setSpecializations(Set<Specialization> specializations) {
         this.specializations = specializations;
+    }
+
+    public void setFieldsFrom(TaskDTO dto) {
+        name = dto.getName();
+        description = dto.getDescription();
     }
 }
