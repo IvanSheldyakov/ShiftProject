@@ -24,6 +24,7 @@ public class Executor {
     @ManyToMany(mappedBy = "executors")
     private Set<Specialization> specializations = new HashSet<>();
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "task_id", referencedColumnName = "id")
     private Task task;
