@@ -1,6 +1,7 @@
 package ru.cft.freelanceservice.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import ru.cft.freelanceservice.model.ExecutorRegisterDTO;
 
 import javax.persistence.*;
@@ -10,15 +11,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "EXECUTORS")
-public class Executor {
 
+public class Executor {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-
-    private String name;
-
-    private String email;
 
     @JsonIgnore
     @ManyToMany(mappedBy = "executors")
@@ -29,6 +26,9 @@ public class Executor {
     @JoinColumn(name = "task_id", referencedColumnName = "id")
     private Task task;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "executor")
+    private User user;
 
     public long getId() {
         return id;
@@ -36,22 +36,6 @@ public class Executor {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public Set<Specialization> getSpecializations() {
@@ -70,8 +54,11 @@ public class Executor {
         this.task = task;
     }
 
-    public void setFieldsFrom(ExecutorRegisterDTO dto) {
-        name = dto.getName();
-        email = dto.getEmail();
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

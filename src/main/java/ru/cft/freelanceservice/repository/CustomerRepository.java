@@ -11,8 +11,5 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
 
     Customer save(Customer customer);
 
-    Optional<Customer> findCustomerByNameAndEmail(String name, String email);
-
-    void deleteByNameAndEmail(String name, String email);
 
 }

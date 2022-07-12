@@ -47,7 +47,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public ResponseEntity<?> registerCustomer(CustomerRegisterDTO customerRegisterDTO) {
-        try {
+       /* try {
             checkCustomerForEmptyFields(customerRegisterDTO);
             checkForCustomerRegistration(customerRegisterDTO);
         } catch (EmptyDTOFieldsException exception) {
@@ -57,12 +57,13 @@ public class RegisterServiceImpl implements RegisterService {
         }
 
         Customer customer = saveCustomer(customerRegisterDTO);
-        return new ResponseEntity<>(customer,HttpStatus.OK);
+        return new ResponseEntity<>(customer,HttpStatus.OK);*/
+        return null;
     }
 
     @Override
     public ResponseEntity<?> registerExecutor(ExecutorRegisterDTO executorRegisterDTO) {
-        try {
+       /* try {
             checkExecutorForEmptyFields(executorRegisterDTO);
             checkForExecutorRegistration(executorRegisterDTO);
         } catch (EmptyDTOFieldsException exception) {
@@ -70,36 +71,37 @@ public class RegisterServiceImpl implements RegisterService {
         } catch (UserIsAlreadyRegisteredException exception) {
             return new ResponseEntity<>("Such user is already registered",HttpStatus.CONFLICT);
         }
-        Executor executor = saveExecutor(executorRegisterDTO);
-        return new ResponseEntity<>(executor,HttpStatus.OK);
+        Executor executor = saveExecutor(executorRegisterDTO);*/
+        //return new ResponseEntity<>(executor,HttpStatus.OK);
+        return null;
     }
 
-    private void checkCustomerForEmptyFields(CustomerRegisterDTO dto) throws EmptyDTOFieldsException {
+   /* private void checkCustomerForEmptyFields(CustomerRegisterDTO dto) throws EmptyDTOFieldsException {
         if (dto.getEmail() == null || dto.getName() == null) {
             throw new EmptyDTOFieldsException();
         }
-    }
+    }*/
 
     private void checkForCustomerRegistration(CustomerRegisterDTO dto) throws UserIsAlreadyRegisteredException {
-        if (!customerRepository.findCustomerByNameAndEmail(dto.getName(), dto.getEmail()).isEmpty()) {
+        /*if (!customerRepository.findCustomerByNameAndEmail(dto.getName(), dto.getEmail()).isEmpty()) {
             throw new UserIsAlreadyRegisteredException();
-        }
+        }*/
     }
 
-    private Customer saveCustomer(CustomerRegisterDTO dto) {
+   /* private Customer saveCustomer(CustomerRegisterDTO dto) {
         Customer customer = new Customer();
         customer.setFieldsFrom(dto);
         customerRepository.save(customer);
         return customer;
-    }
+    }*/
 
 
     private void checkExecutorForEmptyFields(ExecutorRegisterDTO dto) throws EmptyDTOFieldsException {
-        if (dto.getEmail() == null || dto.getName() == null) {throw new EmptyDTOFieldsException("there is no email or name");}
+        /*if (dto.getEmail() == null || dto.getName() == null) {throw new EmptyDTOFieldsException("there is no email or name");}
         if (dto.getSpecializationsAndPrices().size() < 1) {throw new EmptyDTOFieldsException("there is no specializations");}
         for (SpecializationPriceDTO specializationPriceDTO : dto.getSpecializationsAndPrices()) {
             checkSpecializationAndPricesForEmptyFields(specializationPriceDTO);
-        }
+        }*/
     }
 
     private void checkSpecializationAndPricesForEmptyFields(SpecializationPriceDTO dto) throws EmptyDTOFieldsException {
@@ -108,7 +110,7 @@ public class RegisterServiceImpl implements RegisterService {
         }
     }
 
-    private void checkForExecutorRegistration(ExecutorRegisterDTO dto) throws UserIsAlreadyRegisteredException {
+    /*private void checkForExecutorRegistration(ExecutorRegisterDTO dto) throws UserIsAlreadyRegisteredException {
         if (!executorRepository.findExecutorByNameAndEmail(dto.getName(), dto.getEmail()).isEmpty()) {
             throw new UserIsAlreadyRegisteredException();
         }
@@ -120,7 +122,7 @@ public class RegisterServiceImpl implements RegisterService {
         executorRepository.save(executor);
         saveSpecializationsAndPrices(dto,executor);
         return executor;
-    }
+    }*/
 
     private void saveSpecializationsAndPrices(ExecutorRegisterDTO registerDTO, Executor executor) {
         ArrayList<SpecializationPriceDTO> specializationPriceDTOS = registerDTO.getSpecializationsAndPrices();

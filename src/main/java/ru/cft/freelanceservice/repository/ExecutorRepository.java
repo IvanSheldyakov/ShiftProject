@@ -9,8 +9,7 @@ import java.util.Optional;
 @Repository
 public interface ExecutorRepository extends JpaRepository<Executor,Long> {
     Executor save(Executor executor);
-    Optional<Executor> findExecutorByNameAndEmail(String name, String email);
+
     Optional<Executor> findById(Long id);
-    void deleteByNameAndEmail(String name, String email);
 
 }

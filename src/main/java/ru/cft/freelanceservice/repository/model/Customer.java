@@ -2,6 +2,7 @@ package ru.cft.freelanceservice.repository.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import ru.cft.freelanceservice.model.CustomerRegisterDTO;
 
 import javax.persistence.*;
@@ -10,19 +11,21 @@ import java.util.Set;
 
 @Entity
 @Table(name = "CUSTOMERS")
+@Data
 public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    private String name;
-
-    private String email;
 
     @JsonIgnore
     @OneToMany(mappedBy = "customer")
     private Set<Task> tasks = new HashSet<>();
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "customer")
+    private User user;
 
     public void addTask(Task task) {
         tasks.add(task);
@@ -42,22 +45,6 @@ public class Customer {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public Set<Task> getTasks() {
         return tasks;
     }
@@ -66,8 +53,11 @@ public class Customer {
         this.tasks = tasks;
     }
 
-    public void setFieldsFrom(CustomerRegisterDTO dto) {
-        name = dto.getName();
-        email = dto.getEmail();
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

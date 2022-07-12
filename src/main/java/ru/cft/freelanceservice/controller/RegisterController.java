@@ -35,5 +35,4 @@ public class RegisterController {
         return registerService.registerCustomer(customerRegisterDTO);
     }
 
-
 }
