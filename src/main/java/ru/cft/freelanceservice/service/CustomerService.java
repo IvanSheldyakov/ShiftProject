@@ -1,16 +1,24 @@
 package ru.cft.freelanceservice.service;
 
 
-import org.springframework.http.ResponseEntity;
+import ru.cft.freelanceservice.exceptions.NoSuchCustomerException;
+import ru.cft.freelanceservice.exceptions.NoSuchExecutorException;
+import ru.cft.freelanceservice.exceptions.NoSuchSpecializationException;
+import ru.cft.freelanceservice.exceptions.NoSuchTaskException;
 import ru.cft.freelanceservice.model.TaskDTO;
 import ru.cft.freelanceservice.model.TaskIdExecutorIdDTO;
+import ru.cft.freelanceservice.repository.model.Executor;
+import ru.cft.freelanceservice.repository.model.Task;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface CustomerService {
 
-    ResponseEntity<?> createTask(TaskDTO taskDTO, Long userId);
-    ResponseEntity<?> findAllExecutorsBySpecialization(String specialization);
-    ResponseEntity<?> chooseExecutorForTask(TaskIdExecutorIdDTO taskIdExecutorIdDTO);
+    Optional<Task> createTask(TaskDTO taskDTO, Long userId) throws NoSuchCustomerException;
+    List<Executor> findAllExecutorsBySpecialization(String specialization) throws NoSuchSpecializationException;
+    Optional<Executor> chooseExecutorForTask(TaskIdExecutorIdDTO taskIdExecutorIdDTO)throws NoSuchExecutorException, NoSuchTaskException;
 
-    ResponseEntity<?> deleteTask(Long taskId);
+    Optional<Task> deleteTask(Long taskId) throws NoSuchTaskException;
 
 }

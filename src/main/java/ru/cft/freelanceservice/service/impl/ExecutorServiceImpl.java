@@ -4,9 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.cft.freelanceservice.exceptions.NoSuchExecutorException;
 import ru.cft.freelanceservice.repository.CustomerRepository;
 import ru.cft.freelanceservice.repository.ExecutorRepository;
+import ru.cft.freelanceservice.repository.model.Customer;
 import ru.cft.freelanceservice.repository.model.Executor;
+import ru.cft.freelanceservice.repository.model.Task;
 import ru.cft.freelanceservice.service.ExecutorService;
 
 import java.util.Optional;
@@ -23,29 +26,29 @@ public class ExecutorServiceImpl implements ExecutorService {
 
 
     @Override
-    public ResponseEntity<?> getCustomer(Long executorId) {
+    public Optional<Customer> getCustomer(Long executorId) throws NoSuchExecutorException {
         Optional<Executor> executorOptional = executorRepository.findById(executorId);
         if (executorOptional.isEmpty()) {
-            return new ResponseEntity<>("no such executor", HttpStatus.BAD_REQUEST);
+            throw new NoSuchExecutorException();
         }
         Executor executor = executorOptional.get();
         if (executor.getTask() == null) {
-            return new ResponseEntity<>("executor doesn't have customer",HttpStatus.OK);
+            return Optional.empty();
         }
-        return new ResponseEntity<>(executor.getTask().getCustomer(),HttpStatus.OK);
+        return Optional.of(executor.getTask().getCustomer());
     }
 
     @Override
-    public ResponseEntity<?> getTask(Long executorId) {
+    public Optional<Task> getTask(Long executorId) throws NoSuchExecutorException{
         Optional<Executor> executorOptional = executorRepository.findById(executorId);
         if (executorOptional.isEmpty()) {
-            return new ResponseEntity<>("no such executor", HttpStatus.BAD_REQUEST);
+            throw new NoSuchExecutorException();
         }
         Executor executor = executorOptional.get();
         if (executor.getTask() == null) {
-            return new ResponseEntity<>("executor doesn't have task",HttpStatus.OK);
+            return Optional.empty();
         }
 
-        return new ResponseEntity<>(executor.getTask(),HttpStatus.OK);
+        return Optional.of(executor.getTask());
     }
 }

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.cft.freelanceservice.exceptions.EmptyDTOFieldsException;
+import ru.cft.freelanceservice.exceptions.*;
 import ru.cft.freelanceservice.model.TaskDTO;
 import ru.cft.freelanceservice.model.TaskIdExecutorIdDTO;
 import ru.cft.freelanceservice.repository.CustomerRepository;
@@ -39,74 +39,62 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseEntity<?> createTask(TaskDTO taskDTO, Long customerId) {
-
-        try {
-            checkForEmptyFields(taskDTO);
-        } catch (EmptyDTOFieldsException e) {
-            return new ResponseEntity<>("no data", HttpStatus.BAD_REQUEST);
-        }
+    public Optional<Task> createTask(TaskDTO taskDTO, Long customerId) throws NoSuchCustomerException {
 
         Optional<Customer> customer = customerRepository.findById(customerId);
-        if (!customer.isPresent()) {
-            return new ResponseEntity<>("No such user", HttpStatus.BAD_REQUEST);
+        if (customer.isEmpty()) {
+            throw new NoSuchCustomerException();
         }
 
         Task task = createNewTask(taskDTO);
         customer.get().addTask(task);
         customerRepository.save(customer.get());
 
-        return new ResponseEntity<>(task, HttpStatus.OK);
+        return Optional.of(task);
     }
 
     @Override
-    public ResponseEntity<?> findAllExecutorsBySpecialization(String specialization) {
+    public List<Executor> findAllExecutorsBySpecialization(String specialization) throws NoSuchSpecializationException {
         List<Specialization> specializationEntities = specializationRepository.findBySpecialization(specialization);
         if (specializationEntities.isEmpty()) {
-            return new ResponseEntity<>("no such specialization", HttpStatus.OK);
+            throw new NoSuchSpecializationException();
         }
         Set<Executor> executors = new HashSet<>();
         for (Specialization entity: specializationEntities) {
             executors.addAll(entity.getExecutors());
         }
 
-        return new ResponseEntity<>(executors, HttpStatus.OK);
+        return executors.stream().toList();
     }
 
     @Override
-    public ResponseEntity<?> chooseExecutorForTask(TaskIdExecutorIdDTO taskIdExecutorIdDTO) {
+    public Optional<Executor> chooseExecutorForTask(TaskIdExecutorIdDTO taskIdExecutorIdDTO)
+            throws NoSuchExecutorException, NoSuchTaskException {
 
-        try {
-            checkForEmptyFields(taskIdExecutorIdDTO);
-        } catch (EmptyDTOFieldsException exception) {
-            return new ResponseEntity<>("No data", HttpStatus.BAD_REQUEST);
-        }
 
         Optional<Executor> executor = executorRepository.findById(taskIdExecutorIdDTO.getExecutorId());
         if (executor.isEmpty()) {
-            return new ResponseEntity<>("No such executor", HttpStatus.BAD_REQUEST);
+
+            throw new NoSuchExecutorException();
         }
         Optional<Task> task = taskRepository.findById(taskIdExecutorIdDTO.getTaskId());
         if (task.isEmpty()) {
-            return new ResponseEntity<>("No such task", HttpStatus.BAD_REQUEST);
+            throw new NoSuchTaskException();
         }
-
 
         task.get().addExecutor(executor.get());
         taskRepository.save(task.get());
-        return new ResponseEntity<>(executor, HttpStatus.OK);
+        return executor;
     }
 
     @Override
-    public ResponseEntity<?> deleteTask(Long taskId) {
-        if (taskId == null) {
-            return new ResponseEntity<>("no data", HttpStatus.BAD_REQUEST);
-        }
+    public Optional<Task> deleteTask(Long taskId) throws NoSuchTaskException{
 
         Optional<Task> taskOptional = taskRepository.findById(taskId);
 
         if (taskOptional.isEmpty()) {
-            return new ResponseEntity<>("no such task", HttpStatus.BAD_REQUEST);
+
+            throw new NoSuchTaskException();
         }
 
         Task task = taskOptional.get();
@@ -116,7 +104,7 @@ public class CustomerServiceImpl implements CustomerService {
         deleteExecutorsOf(task);
 
         taskRepository.delete(task);
-        return new ResponseEntity<>(task, HttpStatus.OK);
+        return taskOptional;
     }
 
     private Task createNewTask(TaskDTO taskDTO) {
@@ -139,17 +127,7 @@ public class CustomerServiceImpl implements CustomerService {
         return specializationRepository.save(newSpecialization);
     }
 
-    private void checkForEmptyFields(TaskDTO dto) throws EmptyDTOFieldsException {
-        if (dto.getName() == null || dto.getDescription() == null || dto.getSpecializations().size() < 1) {
-            throw new EmptyDTOFieldsException();
-        }
-    }
 
-    private void checkForEmptyFields(TaskIdExecutorIdDTO dto) throws EmptyDTOFieldsException {
-        if (dto.getExecutorId() == null || dto.getTaskId() == null) {
-            throw new EmptyDTOFieldsException();
-        }
-    }
 
     private void deleteTaskFromCustomer(Task task) {
         Customer customer = task.getCustomer();

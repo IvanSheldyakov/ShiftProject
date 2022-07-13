@@ -12,5 +12,5 @@ import ru.cft.freelanceservice.repository.model.Executor;
 
 public interface RegisterService {
     Customer registerCustomer(CustomerRegisterDTO customerRegisterDTO) throws CustomerIsAlreadyRegisteredException;
-    Executor registerExecutor(ExecutorRegisterDTO executorRegisterDTO) throws ExecutorIsAlreadyRegisteredException, NoSuchUserException;
+    Executor registerExecutor(ExecutorRegisterDTO executorRegisterDTO, Long userId) throws ExecutorIsAlreadyRegisteredException, NoSuchUserException;
 }
