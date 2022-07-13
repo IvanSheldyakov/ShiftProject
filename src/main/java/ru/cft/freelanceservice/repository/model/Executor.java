@@ -14,8 +14,11 @@ import java.util.Set;
 
 public class Executor {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    private String username;
+    private String email;
 
     @JsonIgnore
     @ManyToMany(mappedBy = "executors")
@@ -27,9 +30,12 @@ public class Executor {
     private Task task;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "executor")
-    private User user;
+    @ManyToOne
+    @JoinColumn(name = "executor_role_id", referencedColumnName = "id")
+    private Role role;
 
+    @Column(name = "user_id")
+    private Long userId;
     public long getId() {
         return id;
     }
@@ -54,11 +60,35 @@ public class Executor {
         this.task = task;
     }
 
-    public User getUser() {
-        return user;
+    public Role getRole() {
+        return role;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

@@ -7,8 +7,8 @@ import ru.cft.freelanceservice.model.TaskIdExecutorIdDTO;
 
 public interface CustomerService {
 
-    ResponseEntity<?> createTask(TaskDTO taskDTO, Long customerId);
-    ResponseEntity<?> findExecutorsBySpecialization(String specialization);
+    ResponseEntity<?> createTask(TaskDTO taskDTO, Long userId);
+    ResponseEntity<?> findAllExecutorsBySpecialization(String specialization);
     ResponseEntity<?> chooseExecutorForTask(TaskIdExecutorIdDTO taskIdExecutorIdDTO);
 
     ResponseEntity<?> deleteTask(Long taskId);

@@ -60,12 +60,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseEntity<?> findExecutorsBySpecialization(String specialization) {
-        Optional<Specialization> specializationEntity = specializationRepository.findBySpecialization(specialization);
-        if (specializationEntity.isEmpty()) {
+    public ResponseEntity<?> findAllExecutorsBySpecialization(String specialization) {
+        List<Specialization> specializationEntities = specializationRepository.findBySpecialization(specialization);
+        if (specializationEntities.isEmpty()) {
             return new ResponseEntity<>("no such specialization", HttpStatus.OK);
         }
-        return new ResponseEntity<>(specializationEntity.get().getExecutors(), HttpStatus.OK);
+        Set<Executor> executors = new HashSet<>();
+        for (Specialization entity: specializationEntities) {
+            executors.addAll(entity.getExecutors());
+        }
+
+        return new ResponseEntity<>(executors, HttpStatus.OK);
     }
 
     @Override
@@ -124,13 +129,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void addSpecializations(TaskDTO taskDTO, Task task) {
         for (String specialization : taskDTO.getSpecializations()) {
-            Optional<Specialization> specializationEntity = specializationRepository.findBySpecialization(specialization);
-
-            if (specializationEntity.isPresent()) {
-                task.addSpecialization(specializationEntity.get());
-            } else {
-                task.addSpecialization(createNewSpecialization(specialization));
-            }
+            task.addSpecialization(createNewSpecialization(specialization));
         }
     }
 

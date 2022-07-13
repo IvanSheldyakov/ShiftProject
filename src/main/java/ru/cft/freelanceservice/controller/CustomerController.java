@@ -20,12 +20,12 @@ public class CustomerController {
 
     @PostMapping(value = "/create/task", params = "customerId")
     public ResponseEntity<?> createTask(@RequestBody TaskDTO taskDTO, @RequestParam long customerId) {
-        return customerService.createTask(taskDTO,customerId);
+        return customerService.createTask(taskDTO, customerId);
     }
 
     @GetMapping(value = "/find/specialization", params = "specialization")
     public ResponseEntity<?> findExecutorsBySpecialization(@RequestParam String specialization) {
-        return customerService.findExecutorsBySpecialization(specialization);
+        return customerService.findAllExecutorsBySpecialization(specialization);
     }
 
     @PostMapping("/choose/executor")

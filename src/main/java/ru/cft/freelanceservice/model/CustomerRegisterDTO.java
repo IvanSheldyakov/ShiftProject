@@ -1,14 +1,13 @@
 package ru.cft.freelanceservice.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class CustomerRegisterDTO {
-    private String name;
+    private String username;
     private String email;
-    private String firstName;
-    private String secondName;
-    private String password;
 }
 
 

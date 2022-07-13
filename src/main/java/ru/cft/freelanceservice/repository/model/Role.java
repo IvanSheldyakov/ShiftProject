@@ -1,10 +1,10 @@
 package ru.cft.freelanceservice.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 import ru.cft.freelanceservice.model.ERole;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -23,6 +23,34 @@ public class Role {
     @JsonIgnore
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "role")
+    private Set<Customer> customers  = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "role")
+    private Set<Executor> executors  = new HashSet<>();
+
+    public void addCustomer(Customer customer) {
+        customers.add(customer);
+        customer.setRole(this);
+    }
+
+    public void removeCustomer(Customer customer) {
+        customer.setRole(null);
+        customers.remove(customer);
+    }
+
+    public void addExecutor(Executor executor) {
+        executors.add(executor);
+        executor.setRole(this);
+    }
+
+    public void removeExecutor(Executor executor) {
+        executor.setRole(null);
+        executors.remove(executor);
+    }
 
     public Long getId() {
         return id;
