@@ -9,9 +9,6 @@ import java.util.ArrayList;
 @Data
 public class ExecutorRegisterDTO  {
     private String username;
-    private String firstName;
-    private String secondName;
-    private String password;
     private String email;
 
 

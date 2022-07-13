@@ -14,18 +14,27 @@ import java.util.Set;
 @Data
 public class Customer {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_id")
+    private Long userId;
+
+    private String username;
+    private String email;
 
     @JsonIgnore
     @OneToMany(mappedBy = "customer")
     private Set<Task> tasks = new HashSet<>();
 
     @JsonIgnore
-    @OneToOne(mappedBy = "customer")
-    private User user;
+    @ManyToOne
+    @JoinColumn(name = "customer_role_id", referencedColumnName = "id")
+    private Role role;
+
+
 
     public void addTask(Task task) {
         tasks.add(task);
@@ -37,13 +46,7 @@ public class Customer {
         tasks.remove(task);
     }
 
-    public long getId() {
-        return id;
-    }
 
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public Set<Task> getTasks() {
         return tasks;
@@ -53,11 +56,44 @@ public class Customer {
         this.tasks = tasks;
     }
 
-    public User getUser() {
-        return user;
+    public Role getRole() {
+        return role;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

@@ -27,21 +27,17 @@ public class User {
         this.email = email;
     }
 
-    @OneToOne
-    @JoinColumn(name = "customer_id", referencedColumnName = "id")
-    @JsonIgnore
-    private Customer customer;
-
-    @OneToOne
-    @JoinColumn(name = "executor_id", referencedColumnName = "id")
-    @JsonIgnore
-    private Customer executor;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
     private Set<Role> roles = new HashSet<>();
+
+    @Column(name = "customer_id")
+    private Long customerId;
+
+    @Column(name = "executor_id")
+    private Long executorId;
 
     public void addRole(Role role) {
         roles.add(role);
@@ -85,27 +81,27 @@ public class User {
         this.email = email;
     }
 
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public Customer getExecutor() {
-        return executor;
-    }
-
-    public void setExecutor(Customer executor) {
-        this.executor = executor;
-    }
-
     public Set<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public Long getExecutorId() {
+        return executorId;
+    }
+
+    public void setExecutorId(Long executorId) {
+        this.executorId = executorId;
     }
 }

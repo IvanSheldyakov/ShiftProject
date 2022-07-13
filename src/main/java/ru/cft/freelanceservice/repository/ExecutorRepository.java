@@ -12,4 +12,6 @@ public interface ExecutorRepository extends JpaRepository<Executor,Long> {
 
     Optional<Executor> findById(Long id);
 
+    boolean existsByUsernameAndEmail(String username, String email);
+
 }
