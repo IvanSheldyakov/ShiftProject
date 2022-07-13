@@ -62,34 +62,27 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     @Override
-    public Executor registerExecutor(ExecutorRegisterDTO executorRegisterDTO) throws ExecutorIsAlreadyRegisteredException, NoSuchUserException {
+    public Executor registerExecutor(ExecutorRegisterDTO executorRegisterDTO, Long userId) throws ExecutorIsAlreadyRegisteredException, NoSuchUserException {
 
-        if (!checkForUserRegistration(executorRegisterDTO)) {
+        if (!checkForUserRegistration(userId)) {
             throw new NoSuchUserException();
         }
 
-        if (checkForExecutorRegistration(executorRegisterDTO)) {
+        if (checkForExecutorRegistration(userId)) {
             throw new ExecutorIsAlreadyRegisteredException();
         }
 
-        return saveExecutor(executorRegisterDTO);
+        return saveExecutor(executorRegisterDTO,userId);
 
     }
 
-
-
-    private boolean checkNull(CustomerRegisterDTO dto) {
-        if (Objects.isNull(dto)) {return true;}
-        return Stream.of(dto.getUsername(), dto.getEmail()).anyMatch(Objects::isNull);
-
-    }
 
     private boolean checkForCustomerRegistration(CustomerRegisterDTO dto) {
         return customerRepository.existsByUsernameAndEmail(dto.getUsername(), dto.getEmail());
     }
 
-    private boolean checkForUserRegistration(ExecutorRegisterDTO dto) {
-        return userRepository.existsByUsernameAndEmail(dto.getUsername(), dto.getEmail());
+    private boolean checkForUserRegistration(Long userId) {
+        return userRepository.existsById(userId);
     }
 
    private Customer saveCustomer(CustomerRegisterDTO dto) {
@@ -101,21 +94,24 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
 
-     private boolean checkForExecutorRegistration(ExecutorRegisterDTO dto) {
-        return executorRepository.existsByUsernameAndEmail(dto.getUsername(), dto.getEmail());
+     private boolean checkForExecutorRegistration(Long userId) {
+        User user = userRepository.findById(userId).get();
+        return executorRepository.existsByUsernameAndEmail(user.getUsername(), user.getEmail());
     }
 
-    private Executor saveExecutor(ExecutorRegisterDTO dto)  {
-        Executor executor = init(dto);
-        addExecutorToUser(executor);
+    private Executor saveExecutor(ExecutorRegisterDTO dto, Long userId)  {
+        User user = userRepository.findById(userId).get();
+        Executor executor = init(user);
+        Role role = addExecutorToRole(executor);
+        addExecutorToUser(executor,user,role);
         saveSpecializationsAndPrices(dto,executor);
         return executor;
     }
 
-    private Executor init(ExecutorRegisterDTO dto) {
+    private Executor init(User user) {
         Executor executor = new Executor();
-        executor.setUsername(dto.getUsername());
-        executor.setEmail(dto.getEmail());
+        executor.setUsername(user.getUsername());
+        executor.setEmail(user.getEmail());
         return executorRepository.save(executor);
     }
 
@@ -125,11 +121,9 @@ public class RegisterServiceImpl implements RegisterService {
         return roleRepository.save(role);
     }
 
-    private void addExecutorToUser(Executor executor) { //TODO validation
-        User user = userRepository.findByUsername(executor.getUsername()).get();
+    private void addExecutorToUser(Executor executor, User user, Role role) {
         user.setExecutorId(executor.getId());
         executor.setUserId(user.getId());
-        Role role = addExecutorToRole(executor);
         user.addRole(role);
         userRepository.save(user);
     }

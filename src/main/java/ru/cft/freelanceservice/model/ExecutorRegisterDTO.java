@@ -8,9 +8,6 @@ import java.util.ArrayList;
 
 @Data
 public class ExecutorRegisterDTO  {
-    private String username;
-    private String email;
-
 
     @JsonProperty("specializations and prices")
     private ArrayList<SpecializationPriceDTO> specializationsAndPrices = new ArrayList<>();
