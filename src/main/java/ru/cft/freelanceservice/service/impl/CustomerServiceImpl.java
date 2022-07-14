@@ -1,12 +1,11 @@
 package ru.cft.freelanceservice.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.cft.freelanceservice.exceptions.*;
 import ru.cft.freelanceservice.model.TaskDTO;
 import ru.cft.freelanceservice.model.TaskIdExecutorIdDTO;
+import ru.cft.freelanceservice.model.TaskStatus;
 import ru.cft.freelanceservice.repository.CustomerRepository;
 import ru.cft.freelanceservice.repository.ExecutorRepository;
 import ru.cft.freelanceservice.repository.SpecializationRepository;
@@ -18,6 +17,7 @@ import ru.cft.freelanceservice.repository.model.Task;
 import ru.cft.freelanceservice.service.CustomerService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -69,22 +69,47 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Optional<Executor> chooseExecutorForTask(TaskIdExecutorIdDTO taskIdExecutorIdDTO)
-            throws NoSuchExecutorException, NoSuchTaskException {
+            throws
+            NoSuchExecutorException,
+            NoSuchTaskException,
+            TaskIsAlreadyFinished,
+            ExecutorAlreadyHasTaskException,
+            ExecutorHasDifferentSpecializationsComparedToTaskException{
 
 
-        Optional<Executor> executor = executorRepository.findById(taskIdExecutorIdDTO.getExecutorId());
-        if (executor.isEmpty()) {
-
+        Optional<Executor> executorOptional = executorRepository.findById(taskIdExecutorIdDTO.getExecutorId());
+        if (executorOptional.isEmpty()) {
             throw new NoSuchExecutorException();
         }
-        Optional<Task> task = taskRepository.findById(taskIdExecutorIdDTO.getTaskId());
-        if (task.isEmpty()) {
+
+        Executor executor = executorOptional.get();
+        if (executor.getTask() != null) {
+            throw new ExecutorAlreadyHasTaskException();
+        }
+
+        Optional<Task> taskOptional = taskRepository.findById(taskIdExecutorIdDTO.getTaskId());
+        if (taskOptional.isEmpty()) {
             throw new NoSuchTaskException();
         }
 
-        task.get().addExecutor(executor.get());
-        taskRepository.save(task.get());
-        return executor;
+        Task task = taskOptional.get();
+        if (task.getStatus() == TaskStatus.FINISHED) {
+            throw new TaskIsAlreadyFinished();
+        }
+
+        Set<String> intersection = task.getSpecializations().stream().map(Specialization::getSpecialization)
+                .collect(Collectors.toSet());
+
+        intersection.retainAll(executor.getSpecializations().stream().map(Specialization::getSpecialization)
+                .collect(Collectors.toSet()));
+        if (intersection.size() == 0) {
+            throw new ExecutorHasDifferentSpecializationsComparedToTaskException();
+        }
+
+        task.addExecutor(executor);
+        task.setStatus(TaskStatus.IN_PROGRESS);
+        taskRepository.save(task);
+        return Optional.of(executor);
     }
 
     @Override
@@ -110,6 +135,7 @@ public class CustomerServiceImpl implements CustomerService {
     private Task createNewTask(TaskDTO taskDTO) {
         Task task = new Task();
         task.setFieldsFrom(taskDTO);
+        task.setStatus(TaskStatus.OPEN);
         task = taskRepository.save(task);
         addSpecializations(taskDTO, task);
         return taskRepository.save(task);

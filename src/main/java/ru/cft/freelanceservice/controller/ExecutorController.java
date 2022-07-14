@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.cft.freelanceservice.exceptions.ExecutorIsAlreadyRegisteredException;
 import ru.cft.freelanceservice.exceptions.NoSuchExecutorException;
+import ru.cft.freelanceservice.exceptions.NoSuchTaskException;
 import ru.cft.freelanceservice.exceptions.NoSuchUserException;
 import ru.cft.freelanceservice.model.CustomerRegisterDTO;
 import ru.cft.freelanceservice.model.ExecutorRegisterDTO;
@@ -39,19 +40,39 @@ public class ExecutorController {
     @GetMapping(value = "/get/customer", params = "executorId")
     public ResponseEntity<?> getCustomer(@RequestParam Long executorId) {
         if (executorId == null) {
-            return new ResponseEntity<>(new MessageResponse("no data"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("No data"), HttpStatus.BAD_REQUEST);
         }
         try {
             Optional<Customer> customerOptional = executorService.getCustomer(executorId);
             if (customerOptional.isEmpty()) {
-                return new ResponseEntity<>("executor doesn't have customer",HttpStatus.OK);
+                return new ResponseEntity<>(new MessageResponse("Executor doesn't have customer"),HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(customerOptional.get(),HttpStatus.OK);
             }
         } catch (NoSuchExecutorException e) {
-            return new ResponseEntity<>(new MessageResponse("no such executor"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("No such executor"), HttpStatus.BAD_REQUEST);
         }
 
+    }
+
+    @PreAuthorize("hasRole('ROLE_EXECUTOR')")
+    @PostMapping(value = "/finish/task", params = "executorId")
+    public ResponseEntity<?> finishTask(@RequestParam Long executorId) {
+
+        try {
+            Optional<Task> taskOptional = executorService.finishTask(executorId);
+            return new ResponseEntity<>(taskOptional.get(), HttpStatus.OK);
+        } catch (NoSuchExecutorException e) {
+            return new ResponseEntity<>(new MessageResponse("No such executor"), HttpStatus.BAD_REQUEST);
+        } catch (NoSuchTaskException e) {
+            return new ResponseEntity<>(new MessageResponse("Executor doesn't have task"), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_EXECUTOR')")
+    @GetMapping(value = "/get/open/tasks")
+    public ResponseEntity<?> getOpenTasks() {
+        return new ResponseEntity<>(executorService.getOpenTasks(),HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_EXECUTOR')")
