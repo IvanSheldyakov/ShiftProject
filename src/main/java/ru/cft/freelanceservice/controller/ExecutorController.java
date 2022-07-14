@@ -1,5 +1,6 @@
 package ru.cft.freelanceservice.controller;
 
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@Api
 @RestController
 @RequestMapping("api/executor")
 public class ExecutorController {
