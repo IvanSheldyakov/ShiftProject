@@ -2,6 +2,7 @@ package ru.cft.freelanceservice.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import ru.cft.freelanceservice.model.TaskDTO;
+import ru.cft.freelanceservice.model.TaskStatus;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -20,6 +21,9 @@ public class Task {
     private String name;
 
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
 
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
@@ -119,5 +123,13 @@ public class Task {
     public void setFieldsFrom(TaskDTO dto) {
         name = dto.getName();
         description = dto.getDescription();
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
     }
 }
