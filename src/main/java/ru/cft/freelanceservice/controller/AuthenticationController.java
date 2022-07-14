@@ -1,6 +1,7 @@
 package ru.cft.freelanceservice.controller;
 
 
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ import ru.cft.freelanceservice.service.AuthenticationService;
 import ru.cft.freelanceservice.service.RegisterService;
 import ru.cft.freelanceservice.service.UserService;
 
-
+@Api
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
