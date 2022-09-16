@@ -1,2 +1,2 @@
-# ShiftLabProject
-My project for ShiftLab
+# ShiftProject
+My project for Shift
