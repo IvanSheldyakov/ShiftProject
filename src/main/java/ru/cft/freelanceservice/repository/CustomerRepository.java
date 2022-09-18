@@ -10,9 +10,11 @@ import java.util.Optional;
 public interface CustomerRepository extends JpaRepository<Customer,Long> {
 
     Customer save(Customer customer);
+    boolean existsByUsernameAndEmail(String username, String email);
 
-    Optional<Customer> findCustomerByNameAndEmail(String name, String email);
+    Optional<Customer> findByUserId(Long userId);
 
-    void deleteByNameAndEmail(String name, String email);
+
+
 
 }

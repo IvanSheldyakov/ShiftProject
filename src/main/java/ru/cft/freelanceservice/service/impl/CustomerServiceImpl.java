@@ -1,12 +1,11 @@
 package ru.cft.freelanceservice.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.cft.freelanceservice.exceptions.EmptyDTOFieldsException;
+import ru.cft.freelanceservice.exceptions.*;
 import ru.cft.freelanceservice.model.TaskDTO;
 import ru.cft.freelanceservice.model.TaskIdExecutorIdDTO;
+import ru.cft.freelanceservice.model.TaskStatus;
 import ru.cft.freelanceservice.repository.CustomerRepository;
 import ru.cft.freelanceservice.repository.ExecutorRepository;
 import ru.cft.freelanceservice.repository.SpecializationRepository;
@@ -18,6 +17,7 @@ import ru.cft.freelanceservice.repository.model.Task;
 import ru.cft.freelanceservice.service.CustomerService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -39,69 +39,87 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseEntity<?> createTask(TaskDTO taskDTO, Long customerId) {
-
-        try {
-            checkForEmptyFields(taskDTO);
-        } catch (EmptyDTOFieldsException e) {
-            return new ResponseEntity<>("no data", HttpStatus.BAD_REQUEST);
-        }
+    public Optional<Task> createTask(TaskDTO taskDTO, Long customerId) throws NoSuchCustomerException {
 
         Optional<Customer> customer = customerRepository.findById(customerId);
-        if (!customer.isPresent()) {
-            return new ResponseEntity<>("No such user", HttpStatus.BAD_REQUEST);
+        if (customer.isEmpty()) {
+            throw new NoSuchCustomerException();
         }
 
         Task task = createNewTask(taskDTO);
         customer.get().addTask(task);
         customerRepository.save(customer.get());
 
-        return new ResponseEntity<>(task, HttpStatus.OK);
+        return Optional.of(task);
     }
 
     @Override
-    public ResponseEntity<?> findExecutorsBySpecialization(String specialization) {
-        Optional<Specialization> specializationEntity = specializationRepository.findBySpecialization(specialization);
-        if (specializationEntity.isEmpty()) {
-            return new ResponseEntity<>("no such specialization", HttpStatus.OK);
+    public List<Executor> findAllExecutorsBySpecialization(String specialization) throws NoSuchSpecializationException {
+        List<Specialization> specializationEntities = specializationRepository.findBySpecialization(specialization);
+        if (specializationEntities.isEmpty()) {
+            throw new NoSuchSpecializationException();
         }
-        return new ResponseEntity<>(specializationEntity.get().getExecutors(), HttpStatus.OK);
+        Set<Executor> executors = new HashSet<>();
+        for (Specialization entity: specializationEntities) {
+            executors.addAll(entity.getExecutors());
+        }
+
+        return executors.stream().toList();
     }
 
     @Override
-    public ResponseEntity<?> chooseExecutorForTask(TaskIdExecutorIdDTO taskIdExecutorIdDTO) {
+    public Optional<Executor> chooseExecutorForTask(TaskIdExecutorIdDTO taskIdExecutorIdDTO)
+            throws
+            NoSuchExecutorException,
+            NoSuchTaskException,
+            TaskIsAlreadyFinished,
+            ExecutorAlreadyHasTaskException,
+            ExecutorHasDifferentSpecializationsComparedToTaskException{
 
-        try {
-            checkForEmptyFields(taskIdExecutorIdDTO);
-        } catch (EmptyDTOFieldsException exception) {
-            return new ResponseEntity<>("No data", HttpStatus.BAD_REQUEST);
+
+        Optional<Executor> executorOptional = executorRepository.findById(taskIdExecutorIdDTO.getExecutorId());
+        if (executorOptional.isEmpty()) {
+            throw new NoSuchExecutorException();
         }
 
-        Optional<Executor> executor = executorRepository.findById(taskIdExecutorIdDTO.getExecutorId());
-        if (executor.isEmpty()) {
-            return new ResponseEntity<>("No such executor", HttpStatus.BAD_REQUEST);
-        }
-        Optional<Task> task = taskRepository.findById(taskIdExecutorIdDTO.getTaskId());
-        if (task.isEmpty()) {
-            return new ResponseEntity<>("No such task", HttpStatus.BAD_REQUEST);
+        Executor executor = executorOptional.get();
+        if (executor.getTask() != null) {
+            throw new ExecutorAlreadyHasTaskException();
         }
 
+        Optional<Task> taskOptional = taskRepository.findById(taskIdExecutorIdDTO.getTaskId());
+        if (taskOptional.isEmpty()) {
+            throw new NoSuchTaskException();
+        }
 
-        task.get().addExecutor(executor.get());
-        taskRepository.save(task.get());
-        return new ResponseEntity<>(executor, HttpStatus.OK);
+        Task task = taskOptional.get();
+        if (task.getStatus() == TaskStatus.FINISHED) {
+            throw new TaskIsAlreadyFinished();
+        }
+
+        Set<String> intersection = task.getSpecializations().stream().map(Specialization::getSpecialization)
+                .collect(Collectors.toSet());
+
+        intersection.retainAll(executor.getSpecializations().stream().map(Specialization::getSpecialization)
+                .collect(Collectors.toSet()));
+        if (intersection.size() == 0) {
+            throw new ExecutorHasDifferentSpecializationsComparedToTaskException();
+        }
+
+        task.addExecutor(executor);
+        task.setStatus(TaskStatus.IN_PROGRESS);
+        taskRepository.save(task);
+        return Optional.of(executor);
     }
 
     @Override
-    public ResponseEntity<?> deleteTask(Long taskId) {
-        if (taskId == null) {
-            return new ResponseEntity<>("no data", HttpStatus.BAD_REQUEST);
-        }
+    public Optional<Task> deleteTask(Long taskId) throws NoSuchTaskException{
 
         Optional<Task> taskOptional = taskRepository.findById(taskId);
 
         if (taskOptional.isEmpty()) {
-            return new ResponseEntity<>("no such task", HttpStatus.BAD_REQUEST);
+
+            throw new NoSuchTaskException();
         }
 
         Task task = taskOptional.get();
@@ -111,47 +129,31 @@ public class CustomerServiceImpl implements CustomerService {
         deleteExecutorsOf(task);
 
         taskRepository.delete(task);
-        return new ResponseEntity<>(task, HttpStatus.OK);
+        return taskOptional;
     }
 
     private Task createNewTask(TaskDTO taskDTO) {
         Task task = new Task();
         task.setFieldsFrom(taskDTO);
+        task.setStatus(TaskStatus.OPEN);
+        task = taskRepository.save(task);
         addSpecializations(taskDTO, task);
-        taskRepository.save(task);
-        return task;
+        return taskRepository.save(task);
     }
 
     private void addSpecializations(TaskDTO taskDTO, Task task) {
         for (String specialization : taskDTO.getSpecializations()) {
-            Optional<Specialization> specializationEntity = specializationRepository.findBySpecialization(specialization);
-
-            if (specializationEntity.isPresent()) {
-                task.addSpecialization(specializationEntity.get());
-            } else {
-                task.addSpecialization(createNewSpecialization(specialization));
-            }
+            task.addSpecialization(createNewSpecialization(specialization));
         }
     }
 
     private Specialization createNewSpecialization(String specialization) {
         Specialization newSpecialization = new Specialization();
         newSpecialization.setSpecialization(specialization);
-        specializationRepository.save(newSpecialization);
-        return newSpecialization;
+        return specializationRepository.save(newSpecialization);
     }
 
-    private void checkForEmptyFields(TaskDTO dto) throws EmptyDTOFieldsException {
-        if (dto.getName() == null || dto.getDescription() == null || dto.getSpecializations().size() < 1) {
-            throw new EmptyDTOFieldsException();
-        }
-    }
 
-    private void checkForEmptyFields(TaskIdExecutorIdDTO dto) throws EmptyDTOFieldsException {
-        if (dto.getExecutorId() == null || dto.getTaskId() == null) {
-            throw new EmptyDTOFieldsException();
-        }
-    }
 
     private void deleteTaskFromCustomer(Task task) {
         Customer customer = task.getCustomer();

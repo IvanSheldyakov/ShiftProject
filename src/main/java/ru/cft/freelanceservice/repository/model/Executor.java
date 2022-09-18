@@ -1,6 +1,7 @@
 package ru.cft.freelanceservice.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import ru.cft.freelanceservice.model.ExecutorRegisterDTO;
 
 import javax.persistence.*;
@@ -10,14 +11,13 @@ import java.util.Set;
 
 @Entity
 @Table(name = "EXECUTORS")
-public class Executor {
 
+public class Executor {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String name;
-
+    private String username;
     private String email;
 
     @JsonIgnore
@@ -29,29 +29,19 @@ public class Executor {
     @JoinColumn(name = "task_id", referencedColumnName = "id")
     private Task task;
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "executor_role_id", referencedColumnName = "id")
+    private Role role;
 
+    @Column(name = "user_id")
+    private Long userId;
     public long getId() {
         return id;
     }
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public Set<Specialization> getSpecializations() {
@@ -70,8 +60,35 @@ public class Executor {
         this.task = task;
     }
 
-    public void setFieldsFrom(ExecutorRegisterDTO dto) {
-        name = dto.getName();
-        email = dto.getEmail();
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

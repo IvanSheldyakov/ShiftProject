@@ -1,28 +1,24 @@
 package ru.cft.freelanceservice.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
-import ru.cft.freelanceservice.exceptions.EmptyDTOFieldsException;
-import ru.cft.freelanceservice.exceptions.UserIsAlreadyRegisteredException;
+import ru.cft.freelanceservice.exceptions.CustomerIsAlreadyRegisteredException;
+import ru.cft.freelanceservice.exceptions.ExecutorIsAlreadyRegisteredException;
+import ru.cft.freelanceservice.exceptions.NoSuchUserException;
 import ru.cft.freelanceservice.model.CustomerRegisterDTO;
+import ru.cft.freelanceservice.model.ERole;
 import ru.cft.freelanceservice.model.ExecutorRegisterDTO;
 import ru.cft.freelanceservice.model.SpecializationPriceDTO;
-import ru.cft.freelanceservice.repository.PriceRepository;
-import ru.cft.freelanceservice.repository.CustomerRepository;
-import ru.cft.freelanceservice.repository.ExecutorRepository;
-import ru.cft.freelanceservice.repository.SpecializationRepository;
-import ru.cft.freelanceservice.repository.model.Customer;
-import ru.cft.freelanceservice.repository.model.Executor;
-import ru.cft.freelanceservice.repository.model.Price;
-import ru.cft.freelanceservice.repository.model.Specialization;
+import ru.cft.freelanceservice.repository.*;
+import ru.cft.freelanceservice.repository.model.*;
 import ru.cft.freelanceservice.service.RegisterService;
-
-import javax.naming.NoInitialContextException;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-//TODO id
+
 @Service
 public class RegisterServiceImpl implements RegisterService {
 
@@ -32,94 +28,104 @@ public class RegisterServiceImpl implements RegisterService {
     private final PriceRepository priceRepository;
     private final SpecializationRepository specializationRepository;
 
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+
     @Autowired
     public RegisterServiceImpl(CustomerRepository customerRepository,
                                ExecutorRepository executorRepository,
                                PriceRepository priceRepository,
-                               SpecializationRepository specializationRepository) {
-
+                               SpecializationRepository specializationRepository,
+                               RoleRepository roleRepository,
+                               UserRepository userRepository) {
         this.customerRepository = customerRepository;
         this.executorRepository = executorRepository;
         this.priceRepository = priceRepository;
         this.specializationRepository = specializationRepository;
+        this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
     }
+
+
+
 
 
     @Override
-    public ResponseEntity<?> registerCustomer(CustomerRegisterDTO customerRegisterDTO) {
-        try {
-            checkCustomerForEmptyFields(customerRegisterDTO);
-            checkForCustomerRegistration(customerRegisterDTO);
-        } catch (EmptyDTOFieldsException exception) {
-            return new ResponseEntity<>("No data", HttpStatus.BAD_REQUEST);
-        } catch (UserIsAlreadyRegisteredException exception) {
-            return new ResponseEntity<>("Such user is already registered",HttpStatus.CONFLICT);
+    public Customer registerCustomer(CustomerRegisterDTO customerRegisterDTO) throws CustomerIsAlreadyRegisteredException{
+
+
+        if (checkForCustomerRegistration(customerRegisterDTO)) {
+            throw new CustomerIsAlreadyRegisteredException();
         }
 
-        Customer customer = saveCustomer(customerRegisterDTO);
-        return new ResponseEntity<>(customer,HttpStatus.OK);
+        return saveCustomer(customerRegisterDTO);
     }
 
     @Override
-    public ResponseEntity<?> registerExecutor(ExecutorRegisterDTO executorRegisterDTO) {
-        try {
-            checkExecutorForEmptyFields(executorRegisterDTO);
-            checkForExecutorRegistration(executorRegisterDTO);
-        } catch (EmptyDTOFieldsException exception) {
-            return new ResponseEntity<>("No data", HttpStatus.BAD_REQUEST);
-        } catch (UserIsAlreadyRegisteredException exception) {
-            return new ResponseEntity<>("Such user is already registered",HttpStatus.CONFLICT);
+    public Executor registerExecutor(ExecutorRegisterDTO executorRegisterDTO, Long userId) throws ExecutorIsAlreadyRegisteredException, NoSuchUserException {
+
+        if (!checkForUserRegistration(userId)) {
+            throw new NoSuchUserException();
         }
-        Executor executor = saveExecutor(executorRegisterDTO);
-        return new ResponseEntity<>(executor,HttpStatus.OK);
+
+        if (checkForExecutorRegistration(userId)) {
+            throw new ExecutorIsAlreadyRegisteredException();
+        }
+
+        return saveExecutor(executorRegisterDTO,userId);
+
     }
 
-    private void checkCustomerForEmptyFields(CustomerRegisterDTO dto) throws EmptyDTOFieldsException {
-        if (dto.getEmail() == null || dto.getName() == null) {
-            throw new EmptyDTOFieldsException();
-        }
+
+    private boolean checkForCustomerRegistration(CustomerRegisterDTO dto) {
+        return customerRepository.existsByUsernameAndEmail(dto.getUsername(), dto.getEmail());
     }
 
-    private void checkForCustomerRegistration(CustomerRegisterDTO dto) throws UserIsAlreadyRegisteredException {
-        if (!customerRepository.findCustomerByNameAndEmail(dto.getName(), dto.getEmail()).isEmpty()) {
-            throw new UserIsAlreadyRegisteredException();
-        }
+    private boolean checkForUserRegistration(Long userId) {
+        return userRepository.existsById(userId);
     }
 
-    private Customer saveCustomer(CustomerRegisterDTO dto) {
+   private Customer saveCustomer(CustomerRegisterDTO dto) {
         Customer customer = new Customer();
-        customer.setFieldsFrom(dto);
+        customer.setUsername(dto.getUsername());
+        customer.setEmail(dto.getEmail());
         customerRepository.save(customer);
         return customer;
     }
 
 
-    private void checkExecutorForEmptyFields(ExecutorRegisterDTO dto) throws EmptyDTOFieldsException {
-        if (dto.getEmail() == null || dto.getName() == null) {throw new EmptyDTOFieldsException("there is no email or name");}
-        if (dto.getSpecializationsAndPrices().size() < 1) {throw new EmptyDTOFieldsException("there is no specializations");}
-        for (SpecializationPriceDTO specializationPriceDTO : dto.getSpecializationsAndPrices()) {
-            checkSpecializationAndPricesForEmptyFields(specializationPriceDTO);
-        }
+     private boolean checkForExecutorRegistration(Long userId) {
+        User user = userRepository.findById(userId).get();
+        return executorRepository.existsByUsernameAndEmail(user.getUsername(), user.getEmail());
     }
 
-    private void checkSpecializationAndPricesForEmptyFields(SpecializationPriceDTO dto) throws EmptyDTOFieldsException {
-        if (dto.getSpecialization() == null || dto.getPrice() == null) {
-            throw new EmptyDTOFieldsException("there is no specialization or price");
-        }
-    }
-
-    private void checkForExecutorRegistration(ExecutorRegisterDTO dto) throws UserIsAlreadyRegisteredException {
-        if (!executorRepository.findExecutorByNameAndEmail(dto.getName(), dto.getEmail()).isEmpty()) {
-            throw new UserIsAlreadyRegisteredException();
-        }
-    }
-
-    private Executor saveExecutor(ExecutorRegisterDTO dto) {
-        Executor executor = new Executor();
-        executor.setFieldsFrom(dto);
-        executorRepository.save(executor);
+    private Executor saveExecutor(ExecutorRegisterDTO dto, Long userId)  {
+        User user = userRepository.findById(userId).get();
+        Executor executor = init(user);
+        Role role = addExecutorToRole(executor);
+        addExecutorToUser(executor,user,role);
         saveSpecializationsAndPrices(dto,executor);
         return executor;
+    }
+
+    private Executor init(User user) {
+        Executor executor = new Executor();
+        executor.setUsername(user.getUsername());
+        executor.setEmail(user.getEmail());
+        return executorRepository.save(executor);
+    }
+
+    private Role addExecutorToRole(Executor executor) {
+        Role role = roleRepository.findByName(ERole.ROLE_EXECUTOR).get();
+        role.addExecutor(executor);
+        return roleRepository.save(role);
+    }
+
+    private void addExecutorToUser(Executor executor, User user, Role role) {
+        user.setExecutorId(executor.getId());
+        executor.setUserId(user.getId());
+        user.addRole(role);
+        userRepository.save(user);
     }
 
     private void saveSpecializationsAndPrices(ExecutorRegisterDTO registerDTO, Executor executor) {

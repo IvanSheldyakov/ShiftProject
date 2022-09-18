@@ -2,6 +2,7 @@ package ru.cft.freelanceservice.repository.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import ru.cft.freelanceservice.model.CustomerRegisterDTO;
 
 import javax.persistence.*;
@@ -10,19 +11,30 @@ import java.util.Set;
 
 @Entity
 @Table(name = "CUSTOMERS")
+@Data
 public class Customer {
 
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private String name;
+    @Column(name = "user_id")
+    private Long userId;
 
+    private String username;
     private String email;
 
     @JsonIgnore
     @OneToMany(mappedBy = "customer")
     private Set<Task> tasks = new HashSet<>();
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "customer_role_id", referencedColumnName = "id")
+    private Role role;
+
+
 
     public void addTask(Task task) {
         tasks.add(task);
@@ -34,20 +46,30 @@ public class Customer {
         tasks.remove(task);
     }
 
-    public long getId() {
-        return id;
+
+
+    public Set<Task> getTasks() {
+        return tasks;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
     }
 
-    public String getName() {
-        return name;
+    public Role getRole() {
+        return role;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -58,16 +80,20 @@ public class Customer {
         this.email = email;
     }
 
-    public Set<Task> getTasks() {
-        return tasks;
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setTasks(Set<Task> tasks) {
-        this.tasks = tasks;
+    public Long getId() {
+        return id;
     }
 
-    public void setFieldsFrom(CustomerRegisterDTO dto) {
-        name = dto.getName();
-        email = dto.getEmail();
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

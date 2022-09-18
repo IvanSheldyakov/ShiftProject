@@ -5,9 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CustomerRegisterDTO {
-    private String username;
-    private String email;
+public class MessageResponse {
+    private String message;
 }
-
-
