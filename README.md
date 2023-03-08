@@ -1,3 +1,3 @@
-# SHIFTProject
-My project for SHIFT intensive
+# SHIFT_Project
+My project for SHIFT intensive.
 It is a backend of freelance service written using Spring boot 2
